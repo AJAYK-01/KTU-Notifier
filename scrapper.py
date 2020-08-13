@@ -23,7 +23,7 @@ def scrape():
                 links.append(dict({'url': link, 'text': text}))
         except:
             links = []
-        date = content[0].text
+        date = content[0].text.split(':')[0][:-3]
         title = content[1].text
 
         texts = tr.find("li").findAll(text=True)

@@ -1,8 +1,11 @@
 from telebot import TeleBot, types
-import requests
+from decouple import config
 from scrapper import scrape
+import requests
+import os
 
-bot = TeleBot("1357670474:AAG00NzfMKT578_qJY3bDnbPjbLW8VImfIo")
+token = config('TOKEN')
+bot = TeleBot(token)
 
 
 def get_contents():
@@ -16,7 +19,7 @@ def send_random_article(message):
     i = 0
     for content in contents:
         if i < 5:
-            msg_content = content["title"]
+            msg_content = content['date']+'\n\n'+content["title"]+':\n\n'+content["content"]
             for link in content["link"]:
                 msg_link_text = "<a href=\""+link["url"]+"\">"+link["text"]+"</a>"
                 msg_content += "\n"+msg_link_text
