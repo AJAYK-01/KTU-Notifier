@@ -16,10 +16,11 @@ def scrape():
         try:
             links_all = tr.findAll("a")
             for link in links_all:
+                text = link.find(text=True)
                 link = str(link.get('href'))
                 if link.startswith('/'):
                     link = "https://ktu.edu.in"+link
-                links.append(link)
+                links.append(dict({'url': link, 'text': text}))
         except:
             links = []
         date = content[0].text

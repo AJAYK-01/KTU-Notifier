@@ -17,6 +17,9 @@ def send_random_article(message):
     for content in contents:
         if i < 5:
             msg_content = content["title"]
+            for link in content["link"]:
+                msg_link_text = "<a href=\""+link["url"]+"\">"+link["text"]+"</a>"
+                msg_content += "\n"+msg_link_text
             bot.send_message(
                 message.chat.id, msg_content, parse_mode="html",
             )
