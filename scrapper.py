@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 
-def main():
+def scrape():
     url = "https://ktu.edu.in/eu/core/announcements.htm"
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
@@ -35,7 +35,5 @@ def main():
 
         data.append(dict({'date': date, 'title': title, 'link': links, 'content': content}))
         
-    # print(data[21])
-
-if __name__ == "__main__":
-    main()
+    # print(data[0])
+    return data
