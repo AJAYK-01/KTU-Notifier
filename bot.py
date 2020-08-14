@@ -77,7 +77,7 @@ def subscribed(message):
             break
         file2.close()
         send_notifs(message)
-        time.sleep(30)
+        time.sleep(500)
                 
 @bot.message_handler(commands=["unsubscribe"])
 def unsubscribed(message):
