@@ -2,3 +2,4 @@ beautifulsoup4
 requests
 pyTelegramBotAPI
 python-decouple
+APScheduler

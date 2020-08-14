@@ -1,6 +1,7 @@
 from telebot import TeleBot, types
 from decouple import config
 from scrapper import scrape
+from apscheduler.schedulers.blocking import BlockingScheduler
 import requests
 import json
 import time
@@ -65,19 +66,27 @@ def fetch_notifs(message):
         )
 
 
+def scheduledjob(message):
+    
+    file2 = open("sub/"+str(message.chat.id)+".txt", "r")
+    #checking if unsubscribed
+    if file2.read() == "F":
+        pass
+    else:
+        send_notifs(message)
+    file2.close()
+
+
 @bot.message_handler(commands=["subscribe"])
 def subscribed(message):
     file1 = open("sub/"+str(message.chat.id)+".txt", "w")
     file1.write("T")
     file1.close()
-    while 1:
-        file2 = open("sub/"+str(message.chat.id)+".txt", "r")
-        #checking if unsubscribed
-        if file2.read() == "F":
-            break
-        file2.close()
-        send_notifs(message)
-        time.sleep(500)
+    scheduler = BlockingScheduler()
+    scheduler.add_job(scheduledjob, 'interval', minutes=1, args=[message])
+    scheduler.start()
+
+    
                 
 @bot.message_handler(commands=["unsubscribe"])
 def unsubscribed(message):
