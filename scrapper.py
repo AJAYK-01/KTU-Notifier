@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 
 def scrape():
     url = "https://ktu.edu.in/eu/core/announcements.htm"
+    #Since Dumb KTU can go down any minute, it's best to use Try Except
     try:
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -32,7 +33,6 @@ def scrape():
                 if len(text) > 25:
                     if text != title:
                         content += text.replace('\n','').replace('\r','')+'\n'
-                        # break
 
             data.append(dict({'date': date, 'title': title, 'link': links, 'content': content}))
     

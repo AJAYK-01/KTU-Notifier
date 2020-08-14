@@ -6,11 +6,15 @@ import requests
 import json
 import time
 
+#the token is stored in a file named .env in My system. Add your own token or .env file
 token = config('TOKEN')
 bot = TeleBot(token)
 
 
 def get_contents(chat_id):
+    """
+        Checks for changes in ktu site and returns the new notifs
+    """
     contents = []
     scraped = scrape()
     if scraped != []:
@@ -43,6 +47,7 @@ def send_notifs(message):
         for content in contents:
             msg_content = content['date']+'\n\n'+content["title"]+':\n\n'+content["content"]
             for link in content["link"]:
+                #telegram supports html like hyperlinks!! :)
                 msg_link_text = "<a href=\""+link["url"]+"\">"+link["text"]+"</a>"
                 msg_content += "\n"+msg_link_text
             bot.send_message(
@@ -54,11 +59,13 @@ def send_notifs(message):
 
 @bot.message_handler(commands=["view"])
 def fetch_notifs(message):
+    """ view """
     contents = scrape()
     for i in range(10):
         content = contents[i]
         msg_content = content['date']+'\n\n'+content["title"]+':\n\n'+content["content"]
         for link in content["link"]:
+            #telegram supports html like hyperlinks!! :)
             msg_link_text = "<a href=\""+link["url"]+"\">"+link["text"]+"</a>"
             msg_content += "\n"+msg_link_text
         bot.send_message(
@@ -67,6 +74,10 @@ def fetch_notifs(message):
 
 
 def scheduledjob(message):
+    """ Send notifications after checking if subscribed or not. \n
+        Couldn't figure out a way to use global variables, so instead uses
+        variable-like .txt files
+    """
     
     file2 = open("sub/"+str(message.chat.id)+".txt", "r")
     #checking if unsubscribed
@@ -79,17 +90,19 @@ def scheduledjob(message):
 
 @bot.message_handler(commands=["subscribe"])
 def subscribed(message):
+    """ subscribe """
     file1 = open("sub/"+str(message.chat.id)+".txt", "w")
     file1.write("T")
     file1.close()
     scheduler = BackgroundScheduler()
-    scheduler.add_job(scheduledjob, 'interval', minutes=1, args=[message])
+    scheduler.add_job(scheduledjob, 'interval', minutes=15, args=[message])
     scheduler.start()
 
     
                 
 @bot.message_handler(commands=["unsubscribe"])
 def unsubscribed(message):
+    """ unsubscribe """
     file1 = open("sub/"+str(message.chat.id)+".txt", "w")
     file1.write("F")
     file1.close()
@@ -110,6 +123,5 @@ def send_instructions(message):
         message.chat.id, msg_content, parse_mode="markdown",
     )
 
-
+#infinity_polling to prevent timeout to telegram api
 bot.infinity_polling(True)
-# bot.polling(none_stop=True)
