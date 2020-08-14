@@ -1,7 +1,7 @@
 from telebot import TeleBot, types
 from decouple import config
 from scrapper import scrape
-from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.schedulers.background import BackgroundScheduler
 import requests
 import json
 import time
@@ -82,7 +82,7 @@ def subscribed(message):
     file1 = open("sub/"+str(message.chat.id)+".txt", "w")
     file1.write("T")
     file1.close()
-    scheduler = BlockingScheduler()
+    scheduler = BackgroundScheduler()
     scheduler.add_job(scheduledjob, 'interval', minutes=1, args=[message])
     scheduler.start()
 
@@ -111,4 +111,5 @@ def send_instructions(message):
     )
 
 
-bot.polling(none_stop=True)
+bot.infinity_polling(True)
+# bot.polling(none_stop=True)
