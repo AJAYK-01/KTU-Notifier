@@ -91,6 +91,13 @@ def scheduledjob():
 def fetch_notifs(message):
     """ view """
     contents = scrape()
+    
+    #If dumb KTU is down as expected, fetch from previously scraped data
+    if contents == [] or not contents:
+        file1 = open('data.json', 'r')
+        contents = json.load(file1)
+        file1.close()
+
     for i in range(10):
         content = contents[i]
         msg_content = content['date']+'\n\n'+content["title"]+':\n\n'+content["content"]
