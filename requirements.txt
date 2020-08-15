@@ -3,3 +3,9 @@ requests
 pyTelegramBotAPI
 python-decouple
 APScheduler
+firebase
+python_jwt
+gcloud
+sseclient
+pycrypto
+requests-toolbelt

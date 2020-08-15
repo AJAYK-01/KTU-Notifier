@@ -1,6 +1,7 @@
 from telebot import TeleBot, types
 from decouple import config
 from scrapper import scrape
+from subscribers import subscribe, unsubscribe, users
 from apscheduler.schedulers.background import BackgroundScheduler
 import requests
 import json
@@ -46,8 +47,7 @@ def get_contents():
 
 def send_notifs(chat_id, contents):
     """/notifs."""
-    # chat_id = str(message.chat.id)
-    # contents = get_contents(chat_id)
+
     if contents and contents != []:
         for content in contents:
             msg_content = content['date']+'\n\n'+content["title"]+':\n\n'+content["content"]
@@ -69,22 +69,15 @@ def scheduledjob():
     """
 
     contents = get_contents()
-    for filename in os.listdir(os.getcwd()+'/sub/'):
-        
-        chat_id = filename.split('.')[0]
-        filename = 'sub/'+filename
-        if filename.split('.')[-1] == "txt":
-
-            with open(filename, "r") as file2:
-                
-                """ checking if unsubscribed """
-                if file2.read() == "F":
-                    pass
-                else:
-                    # print(chat_id)
-                    send_notifs(chat_id, contents)
-                file2.close()
-
+    
+    for key, value in users().items():
+        chat_id = key
+        """ checking if unsubscribed """
+        if value == "F":
+            pass
+        else:
+            # print(chat_id)
+            send_notifs(chat_id, contents)
 
 
 @bot.message_handler(commands=["view"])
@@ -113,9 +106,8 @@ def fetch_notifs(message):
 @bot.message_handler(commands=["subscribe"])
 def subscribed(message):
     """ subscribe """
-    file1 = open("sub/"+str(message.chat.id)+".txt", "w")
-    file1.write("T")
-    file1.close()
+
+    subscribe(message.chat.id)
     bot.send_message(
             message.chat.id, "Subscribed!!", parse_mode="markdown",
     )  
@@ -125,9 +117,8 @@ def subscribed(message):
 @bot.message_handler(commands=["unsubscribe"])
 def unsubscribed(message):
     """ unsubscribe """
-    file1 = open("sub/"+str(message.chat.id)+".txt", "w")
-    file1.write("F")
-    file1.close()
+
+    unsubscribe(message.chat.id)
     bot.send_message(
             message.chat.id, "Unsubscribed", parse_mode="markdown",
     )  
