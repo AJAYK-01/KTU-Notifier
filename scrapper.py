@@ -30,9 +30,10 @@ def scrape():
             texts = tr.find("li").findAll(text=True)
             content = ''
             for text in texts:
-                if len(text) > 25:
-                    if text != title:
-                        content += text.replace('\n','').replace('\r','')+'\n'
+                if len(text) > 25 and text != title:
+                    """ 25 is an arbitrarily taken length, content is definitely more than 25 characters
+                    and hyperlink text (eg, notification, timetable) is definitely less than 25 """
+                    content += text.replace('\n','').replace('\r','')+'\n'
 
             data.append(dict({'date': date, 'title': title, 'link': links, 'content': content}))
     

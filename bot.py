@@ -46,7 +46,7 @@ def get_contents():
         return []
 
 def send_notifs(chat_id, contents):
-    """/notifs."""
+    """ Sends the newly scraped notification to individual users"""
 
     if contents and contents != []:
         for content in contents:
@@ -59,13 +59,11 @@ def send_notifs(chat_id, contents):
                 int(chat_id), msg_content, parse_mode="html",
             )
             
-    else:
-        pass
 
 def scheduledjob():
-    """ Send notifications after checking if subscribed or not. \n
-        Couldn't figure out a way to use global variables, so instead uses
-        variable-like .txt files
+    """ Send new notifications that come on KTU site. \n
+        Checks subscription status of each user from Firebase Realtime Database and sends notifs
+        to subscribers
     """
 
     contents = get_contents()
@@ -73,9 +71,7 @@ def scheduledjob():
     for key, value in users().items():
         chat_id = key
         """ checking if unsubscribed """
-        if value == "F":
-            pass
-        else:
+        if value == "T":
             # print(chat_id)
             send_notifs(chat_id, contents)
 
@@ -128,7 +124,7 @@ def unsubscribed(message):
 def send_instructions(message):
     """/start"""
     msg_content = (
-        "*Available commands:*\n\n" "/subscribe - Subscribe to KTU Notifs \n\n /unsubscribe - Unsubscribe from KTU Notifs \n\n /view - Fetch latest 10 Notifs from KTU \n\n /code - View source code GitHub"
+        "*Available commands:*\n\n /subscribe - Subscribe to KTU Notifs \n\n /unsubscribe - Unsubscribe from KTU Notifs \n\n /view - Fetch latest 10 Notifs from KTU \n\n /code - View source code GitHub"
     )
     bot.send_message(
         message.chat.id, msg_content, parse_mode="markdown",
@@ -136,7 +132,7 @@ def send_instructions(message):
 
 @bot.message_handler(commands=["code"])
 def start_bot(message):
-    """code"""
+    """code - if admin, used to start the bot's scraping scheduler, else displays link to Github repo"""
 
     if str(message.chat.id) == admin:
         scheduler = BackgroundScheduler()
