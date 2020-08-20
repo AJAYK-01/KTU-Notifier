@@ -202,17 +202,16 @@ def make_model():
 
 
 
-def predict_process_docs(vocab):
+def predict_process_docs(doc,vocab):
     documents = list()
-    doc = load_doc("data/predict/test_notif.txt")
 	# clean doc
     tokens = clean_doc(doc, vocab)
 	# add to list
     documents.append(tokens)
     return documents
 
-def predict():
-    predict_docs = predict_process_docs(vocab)
+def predict(doc):
+    predict_docs = predict_process_docs(doc,vocab)
 
     with open('tokenizer.pickle', 'rb') as handle:
         tokenizer = pickle.load(handle)
@@ -231,7 +230,8 @@ def predict():
         return(0)
 
 if __name__ == "__main__":
-    result=predict()
+    doc=input("\n\nenter the notification to check\n\n")
+    result=predict(doc)
     if (result == 1) :
         print("\nRelevant \n")
     else :
