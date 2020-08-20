@@ -235,5 +235,5 @@ if __name__ == "__main__":
     if (result == 1) :
         print("\nRelevant \n")
     else :
-        print("\nIrrelevant \n")   
+        print("\nIrrelevant\n")   
 
