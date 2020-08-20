@@ -15,7 +15,9 @@ from nltk.corpus import stopwords
 from numpy import loadtxt
 from tensorflow.python.keras.models import load_model
 import pickle
-
+from nltk.stem import WordNetLemmatizer 
+  
+lemmatizer = WordNetLemmatizer()
 
 # load doc into memory
 def load_doc(filename):
@@ -32,8 +34,7 @@ def clean_doc(doc):
 	# split into tokens by white space
 	tokens = doc.split()
 	# remove punctuation from each token
-	table = str.maketrans('', '', punctuation)
-	tokens = [w.translate(table) for w in tokens]
+	tokens = [lemmatizer.lemmatize(w) for w in tokens]
 	# remove remaining tokens that are not alphabetic
 	tokens = [word for word in tokens if word.isalpha()]
 	# filter out stop words
@@ -71,7 +72,7 @@ print(len(vocab))
 # print the top words in the vocab
 print(vocab.most_common(50))
 
-min_occurane = 2
+min_occurane = 3
 tokens = [k for k,c in vocab.items() if c >= min_occurane]
 print(len(tokens))
 
@@ -110,8 +111,7 @@ def clean_doc(doc, vocab):
 	# split into tokens by white space
 	tokens = doc.split()
 	# remove punctuation from each token
-	table = str.maketrans('', '', punctuation)
-	tokens = [w.translate(table) for w in tokens]
+	tokens = [lemmatizer.lemmatize(w) for w in tokens]
 	# filter out tokens not in vocab
 	tokens = [w for w in tokens if w in vocab]
 	tokens = ' '.join(tokens)
@@ -192,7 +192,7 @@ def make_model():
     # compile network
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
     # fit network
-    model.fit(Xtrain, ytrain, epochs=10, verbose=2)
+    model.fit(Xtrain, ytrain, epochs=15, verbose=1)
     # evaluate
     loss, acc = model.evaluate(Xtest, ytest, verbose=0)
     print('Test Accuracy: %f' % (acc*100))
@@ -218,7 +218,7 @@ def predict(doc):
 
     encoded_docs = tokenizer.texts_to_sequences(predict_docs)
 
-    X = pad_sequences(encoded_docs, maxlen=125, padding='post')
+    X = pad_sequences(encoded_docs, maxlen=94, padding='post')
     # load model
     model = load_model('relevancy_model.h5')
     y=model.predict_classes(np.array(X))
@@ -235,5 +235,6 @@ if __name__ == "__main__":
     if (result == 1) :
         print("\nRelevant \n")
     else :
-        print("\nIrrelevant\n")   
+        print("\nIrrelevant\n") 
+ 
 
