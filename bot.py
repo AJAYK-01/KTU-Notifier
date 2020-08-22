@@ -12,10 +12,6 @@ import os
 token = config('TOKEN')
 bot = TeleBot(token)
 
-"""Chat id of the admin, so that only he/she can execute the code command 
- after maintanence to start the bot service """
-admin = config('ADMIN')
-
 
 def get_contents():
     """
@@ -132,20 +128,15 @@ def send_instructions(message):
 
 @bot.message_handler(commands=["code"])
 def start_bot(message):
-    """code - if admin, used to start the bot's scraping scheduler, else displays link to Github repo"""
-
-    if str(message.chat.id) == admin:
-        scheduler = BackgroundScheduler()
-        scheduler.add_job(scheduledjob, 'interval', minutes=10)
-        scheduler.start()
-        bot.send_message(
-            message.chat.id, "Started service", parse_mode="markdown",
-        )   
+    """code - Displays link to Github repo of this project"""
     
-    else:
-        bot.send_message(
-            message.chat.id, "View the complete code at \n\n https://github.com/AJAYK-01/ktu-notifier ", parse_mode="markdown",
-        ) 
+    bot.send_message(
+        message.chat.id, "View the complete code at \n\n https://github.com/AJAYK-01/ktu-notifier ", parse_mode="markdown",
+    ) 
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(scheduledjob, 'interval', minutes=10)
+scheduler.start()
 
 #infinity_polling to prevent timeout to telegram api
 bot.infinity_polling(True)
