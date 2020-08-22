@@ -1,8 +1,9 @@
 from telebot import TeleBot, types
 from decouple import config
 from scrapper import scrape
-from subscribers import subscribe, unsubscribe, users
+from subscribers import subscribe, unsubscribe, users, relevantsub
 from apscheduler.schedulers.background import BackgroundScheduler
+from nlp import relevant
 import requests
 import json
 import time
@@ -41,19 +42,22 @@ def get_contents():
     else:
         return []
 
-def send_notifs(chat_id, contents):
+def send_notifs(chat_id, contents, value):
     """ Sends the newly scraped notification to individual users"""
 
     if contents and contents != []:
         for content in contents:
-            msg_content = content['date']+'\n\n'+content["title"]+':\n\n'+content["content"]
-            for link in content["link"]:
-                #telegram supports html like hyperlinks!! :)
-                msg_link_text = "<a href=\""+link["url"]+"\">"+link["text"]+"</a>"
-                msg_content += "\n"+msg_link_text
-            bot.send_message(
-                int(chat_id), msg_content, parse_mode="html",
-            )
+            relevance = relevant(content["content"])
+            """ Checking for Relevance using ML and also whether user wants all notifs """
+            if relevance == 1 and value == 'T':
+                msg_content = content['date']+'\n\n'+content["title"]+':\n\n'+content["content"]
+                for link in content["link"]:
+                    #telegram supports html like hyperlinks!! :)
+                    msg_link_text = "<a href=\""+link["url"]+"\">"+link["text"]+"</a>"
+                    msg_content += "\n"+msg_link_text
+                bot.send_message(
+                    int(chat_id), msg_content, parse_mode="html",
+                )
             
 
 def scheduledjob():
@@ -67,9 +71,9 @@ def scheduledjob():
     for key, value in users().items():
         chat_id = key
         """ checking if unsubscribed """
-        if value == "T":
+        if value != "F":
             # print(chat_id)
-            send_notifs(chat_id, contents)
+            send_notifs(chat_id, contents, value)
 
 
 @bot.message_handler(commands=["view"])
@@ -104,6 +108,15 @@ def subscribed(message):
             message.chat.id, "Subscribed!!", parse_mode="markdown",
     )  
 
+@bot.message_handler(commands=["filtered"])
+def filtered(message):
+    """ subscribe for relevant notifs only """
+
+    relevantsub(message.chat.id)
+    bot.send_message(
+            message.chat.id, "Subscribed to Relevant Notiications (*Beta*)", parse_mode="markdown",
+    )  
+
     
                 
 @bot.message_handler(commands=["unsubscribe"])
@@ -120,7 +133,7 @@ def unsubscribed(message):
 def send_instructions(message):
     """/start"""
     msg_content = (
-        "*Available commands:*\n\n /subscribe - Subscribe to KTU Notifs \n\n /unsubscribe - Unsubscribe from KTU Notifs \n\n /view - Fetch latest 10 Notifs from KTU \n\n /code - View source code GitHub"
+        "*Available commands:*\n\n /subscribe - Subscribe to KTU Notifs \n\n /filtered - Subscribe to *only Relevant* KTU Notifs (*Beta*) \n\n /unsubscribe - Unsubscribe from KTU Notifs \n\n /view - Fetch latest 10 Notifs from KTU \n\n /code - View source code GitHub"
     )
     bot.send_message(
         message.chat.id, msg_content, parse_mode="markdown",
