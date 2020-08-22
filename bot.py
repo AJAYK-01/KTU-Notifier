@@ -49,7 +49,7 @@ def send_notifs(chat_id, contents, value):
         for content in contents:
             relevance = relevant(content["content"])
             """ Checking for Relevance using ML and also whether user wants all notifs """
-            if relevance == 1 and value == 'T':
+            if relevance == 1 or value == 'T':
                 msg_content = content['date']+'\n\n'+content["title"]+':\n\n'+content["content"]
                 for link in content["link"]:
                     #telegram supports html like hyperlinks!! :)
