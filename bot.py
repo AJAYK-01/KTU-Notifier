@@ -44,16 +44,15 @@ def get_contents():
 def send_notifs(chat_id, contents):
     """ Sends the newly scraped notification to individual users"""
 
-    if contents and contents != []:
-        for content in contents:
-            msg_content = content['date']+'\n\n'+content["title"]+':\n\n'+content["content"]
-            for link in content["link"]:
-                #telegram supports html like hyperlinks!! :)
-                msg_link_text = "<a href=\""+link["url"]+"\">"+link["text"]+"</a>"
-                msg_content += "\n"+msg_link_text
-            bot.send_message(
-                int(chat_id), msg_content, parse_mode="html",
-            )
+    for content in contents:
+        msg_content = content['date']+'\n\n'+content["title"]+':\n\n'+content["content"]
+        for link in content["link"]:
+            #telegram supports html like hyperlinks!! :)
+            msg_link_text = "<a href=\""+link["url"]+"\">"+link["text"]+"</a>"
+            msg_content += "\n"+msg_link_text
+        bot.send_message(
+            int(chat_id), msg_content, parse_mode="html",
+        )
             
 
 def scheduledjob():
@@ -64,12 +63,13 @@ def scheduledjob():
 
     contents = get_contents()
     
-    for key, value in users().items():
-        chat_id = key
-        """ checking if unsubscribed """
-        if value == "T":
-            # print(chat_id)
-            send_notifs(chat_id, contents)
+    if contents and contents != []:
+        for key, value in users().items():
+            chat_id = key
+            """ checking if unsubscribed """
+            if value == "T":
+                # print(chat_id)
+                send_notifs(chat_id, contents)
 
 
 @bot.message_handler(commands=["view"])
