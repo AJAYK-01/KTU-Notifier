@@ -26,7 +26,7 @@ def get_contents():
             k = 0
             for data in datas:
             # Can't do a "not in" comparison with dictionary element coz dload links in it are unique to each request
-                if data['title'] == scrap['title']:
+                if data['title'] == scrap['title'] and data['date'] == scrap['date']:
                     k = 1
                     break   
             
