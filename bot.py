@@ -1,27 +1,26 @@
 from telebot import TeleBot, types
 from decouple import config
 from scrapper import scrape
-from subscribers import subscribe, unsubscribe, users
+from db import subscribe, unsubscribe, users, getData, setData
 from apscheduler.schedulers.background import BackgroundScheduler
 import requests
-import json
 import time
 import os
 
 #the token is stored in a file named .env in My system. Add your own token or .env file
 token = config('TOKEN')
 bot = TeleBot(token)
-
+notifs = getData()
 
 def get_contents():
     """
         Checks for changes in ktu site and returns the new notifs
     """
+    global notifs
     contents = []
     scraped = scrape()
     if scraped != []:
-        js = open("data.json","r")
-        datas = json.load(js)
+        datas = notifs
         for scrap in scraped:
             k = 0
             for data in datas:
@@ -32,11 +31,8 @@ def get_contents():
             
             if k == 0:
                 contents.append(scrap)
-        js.close()
-        js = open("data.json","w")
-        json.dump(scraped, js, indent=4)
-        js.close()
         
+        notifs = scraped
         return contents
     else:
         return []
@@ -64,6 +60,7 @@ def scheduledjob():
     contents = get_contents()
     
     if contents and contents != []:
+        setData(notifs)
         for key, value in users().items():
             chat_id = key
             """ checking if unsubscribed """
@@ -79,9 +76,7 @@ def fetch_notifs(message):
     
     #If dumb KTU is down as expected, fetch from previously scraped data
     if contents == [] or not contents:
-        file1 = open('data.json', 'r')
-        contents = json.load(file1)
-        file1.close()
+        contents = notifs
 
     for i in range(10):
         content = contents[i]

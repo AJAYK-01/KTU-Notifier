@@ -13,6 +13,18 @@ firebase = Firebase(config)
 
 db = firebase.database()
 
+def getData():
+    """ Returns the scraped notifications from the Firebase Database as dictionary """
+    data = []
+    notifs = db.child("notifs").get().val()
+    for notif in notifs:
+        data.append(notif)
+    return data
+
+def setData(data):
+    """ Updates the notifications Firebase DB with the new notifications """
+    db.child("notifs").set(data)
+
 def users():
     """ Gathers the list of Users from the Firebase Database as a dictionary"""
     users = []
