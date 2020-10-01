@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 
 def scrape():
     url = "https://ktu.edu.in/eu/core/announcements.htm"
-    #Since Dumb KTU can go down any minute, it's best to use Try Except
+    #Since Dumb KTU aka Stanford lite's humongous site can go down any minute, it's best to use Try Except
     try:
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
