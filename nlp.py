@@ -160,7 +160,7 @@ def make_model():
     Xtrain = pad_sequences(encoded_docs, maxlen=max_length, padding='post')
 
     # define training labels
-    ytrain = np.array([0 for _ in range(100)] + [1 for _ in range(100)])
+    ytrain = np.array([0 for _ in range(160)] + [1 for _ in range(160)])
 
     # load all test reviews
     positive_docs = process_docs('data/pos_test', vocab, False)
@@ -171,7 +171,7 @@ def make_model():
     # pad sequences
     Xtest = pad_sequences(encoded_docs, maxlen=max_length, padding='post')
     # define test labels
-    ytest = np.array([0 for _ in range(3)] + [1 for _ in range(174)])
+    ytest = np.array([0 for _ in range(7)] + [1 for _ in range(50)])
 
     print("\n pad_sequences : ",Xtest)
     print("\n ytest : ",ytest)
@@ -196,6 +196,7 @@ def make_model():
     # evaluate
     loss, acc = model.evaluate(Xtest, ytest, verbose=0)
     print('Test Accuracy: %f' % (acc*100))
+
 
     model.save("relevancy_model.h5")
     print("Done!")
@@ -230,6 +231,7 @@ def predict(doc):
         return(0)
 
 if __name__ == "__main__":
+    #make_model()
     doc=input("\n\nenter the notification to check\n\n")
     result=predict(doc)
     if (result == 1) :
