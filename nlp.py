@@ -1,3 +1,6 @@
+import nltk
+nltk.download('stopwords')
+nltk.download('wordnet')
 import numpy as np
 import tensorflow.python.keras
 from tensorflow.python.keras.preprocessing.text import Tokenizer
@@ -230,13 +233,11 @@ def predict(doc):
         #print("\nIrrelevant \n")   
         return(0)
 
-if __name__ == "__main__":
-    #make_model()
-    doc=input("\n\nenter the notification to check\n\n")
-    result=predict(doc)
+def relevant(notif):
+    """ Checks for relevance of the notification content """ 
+    result=predict(notif)
+    print(result)
     if (result == 1) :
-        print("\nRelevant \n")
+        return 1
     else :
-        print("\nIrrelevant\n") 
- 
-
+        return 0 
