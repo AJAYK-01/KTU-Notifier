@@ -1,7 +1,7 @@
 from telebot import TeleBot, types
 from decouple import config
 from scrapper import scrape
-from subscribers import subscribe, unsubscribe, users, relevantsub
+from db import subscribe, unsubscribe, users, relevantsub, getData, setData
 from apscheduler.schedulers.background import BackgroundScheduler
 from nlp import relevant
 import requests
@@ -25,18 +25,15 @@ def get_contents():
         for scrap in scraped:
             k = 0
             for data in datas:
-    # Can't do a "not in" comparison with dictionary element coz dload links in it are unique to each request
-                if data['title'] == scrap['title']:
+            # Can't do a "not in" comparison with dictionary element coz download links inside it are 
+            # unique to each request
+                if data['title'] == scrap['title'] and data['date'] == scrap['date']:
                     k = 1
                     break   
             
             if k == 0:
                 relevance = relevant(scrap['content'])
                 contents.append(dict({'data': scrap, 'relevance': str(relevance)}))
-        js.close()
-        js = open("data.json","w")
-        json.dump(scraped, js, indent=4)
-        js.close()
         
         notifs = scraped
         return contents
@@ -50,7 +47,8 @@ def send_notifs(chat_id, contents, value):
     for content in contents:
         relevance = content['relevance']
         content = content['data']
-       
+
+        """ Checking for Relevance using ML and also whether user wants all notifs """
         if relevance == '1' or value == 'T':
             msg_content = content['date']+'\n\n'+content["title"]+':\n\n'+content["content"]
             for link in content["link"]:
@@ -72,9 +70,11 @@ def scheduledjob():
     if contents and contents != []:
         for key, value in users().items():
             chat_id = key
-            """ checking if unsubscribed """
+            """ checking if unsubscribed and send the notification """
             if value != "F":
                 send_notifs(chat_id, contents, value)
+        
+        setData(notifs)
 
 
 @bot.message_handler(commands=["view"])
