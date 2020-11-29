@@ -17,7 +17,7 @@ Gives Notifications of KTU announcements from their site using a Telegram Bot ( 
 - Your bot should work as long as you have bot.py running.
 - You can host it to Heroku to run forever using instructions at https://github.com/michaelkrukov/heroku-python-script.
 
-#### Head over to branch categoriser for an ML based filterer that checks for relevancy of each KTU Notification made by [@nandakishormpai2001](https://github.com/nandakishormpai2001)
+#### Big thanks to [@nandakishormpai2001](https://github.com/nandakishormpai2001) for adding an NLP based filterer that checks for relevancy of each KTU Notification
 
 ## Screenshot of .env file
 
