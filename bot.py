@@ -5,24 +5,23 @@ from subscribers import subscribe, unsubscribe, users, relevantsub
 from apscheduler.schedulers.background import BackgroundScheduler
 from nlp import relevant
 import requests
-import json
 import time
 import os
 
 #the token is stored in a file named .env in My system. Add your own token or .env file
 token = config('TOKEN')
 bot = TeleBot(token)
-
+notifs = getData()
 
 def get_contents():
     """
         Checks for changes in ktu site and returns the new notifs
     """
+    global notifs
     contents = []
     scraped = scrape()
     if scraped != []:
-        js = open("data.json","r")
-        datas = json.load(js)
+        datas = notifs
         for scrap in scraped:
             k = 0
             for data in datas:
@@ -39,6 +38,7 @@ def get_contents():
         json.dump(scraped, js, indent=4)
         js.close()
         
+        notifs = scraped
         return contents
     else:
         return []
@@ -84,9 +84,7 @@ def fetch_notifs(message):
     
     #If dumb KTU is down as expected, fetch from previously scraped data
     if contents == [] or not contents:
-        file1 = open('data.json', 'r')
-        contents = json.load(file1)
-        file1.close()
+        contents = notifs
 
     for i in range(10):
         content = contents[i]
