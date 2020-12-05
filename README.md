@@ -3,7 +3,7 @@
 Gives Notifications of KTU announcements from their site using a Telegram Bot ( http://t.me/ktunotifbot )
 
 ## Workflow
-<img src="https://github.com/AJAYK-01/ktu-notifier/blob/master/screenshots/Workflow.jpeg" />
+<img src="https://github.com/AJAYK-01/ktu-notifier/blob/master/screenshots/Workflow.png" />
 
 ## Instructions to create your own version of this bot
 
