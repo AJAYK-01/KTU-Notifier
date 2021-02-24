@@ -1,5 +1,6 @@
 beautifulsoup4
 requests
+html5lib
 pyTelegramBotAPI
 python-decouple
 APScheduler
