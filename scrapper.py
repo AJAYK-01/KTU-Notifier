@@ -6,7 +6,7 @@ def scrape():
     #Since Dumb KTU can go down any minute, it's best to use Try Except
     try:
         response = requests.get(url)
-        soup = BeautifulSoup(response.text, 'html.parser')
+        soup = BeautifulSoup(response.text, 'html5lib')
         table = soup.find("table", {"class": "ktu-news"})
         tr_list = table.findAll("tr")
 
