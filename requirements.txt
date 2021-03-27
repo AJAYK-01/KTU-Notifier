@@ -1,14 +1,4 @@
-beautifulsoup4
-requests
-pyTelegramBotAPI
-python-decouple
-APScheduler
-firebase
-python_jwt
-gcloud
-sseclient
-pycrypto
-requests-toolbelt
 numpy==1.19.1
-tensorflow==2.0
+tensorflow==2.2.0
+h5py==2.10.0
 nltk==3.5
