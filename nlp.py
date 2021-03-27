@@ -21,6 +21,7 @@ import pickle
 from nltk.stem import WordNetLemmatizer 
 from sklearn.naive_bayes import GaussianNB
 from sklearn import metrics
+from sklearn.model_selection import train_test_split
   
 lemmatizer = WordNetLemmatizer()
 
@@ -163,11 +164,13 @@ def make_model():
     print("\n\n maxlenght="+str(max_length))
 
     from tensorflow.python.keras.preprocessing.sequence import pad_sequences
-    Xtrain = pad_sequences(encoded_docs, maxlen=max_length, padding='post')
+    X = pad_sequences(encoded_docs, maxlen=max_length, padding='post')
 
     # define training labels
-    ytrain = np.array([0 for _ in range(250)] + [1 for _ in range(250)])
+    y = np.array([0 for _ in range(270)] + [1 for _ in range(270)])
 
+    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.30, random_state=42)
+    '''
     # load all test reviews
     positive_docs = process_docs('data/pos_test', vocab, False)
     negative_docs = process_docs('data/neg_test', vocab, False)
@@ -178,7 +181,7 @@ def make_model():
     Xtest = pad_sequences(encoded_docs, maxlen=max_length, padding='post')
     # define test labels
     ytest = np.array([0 for _ in range(len(listdir("data/neg_test")))] + [1 for _ in range(len(listdir("data/pos_test")))])
-
+    '''
     print("\n pad_sequences : ",Xtest)
     print("\n ytest : ",ytest)
 
@@ -188,8 +191,6 @@ def make_model():
     # define model
     model = Sequential()
     model.add(Embedding(vocab_size, 100, input_length=max_length))
-    model.add(Conv1D(filters=128, kernel_size=8, activation='relu'))
-    model.add(MaxPooling1D(pool_size=2))
     model.add(Conv1D(filters=64, kernel_size=8, activation='relu'))
     model.add(MaxPooling1D(pool_size=2))
     model.add(Conv1D(filters=32, kernel_size=8, activation='relu'))
@@ -206,7 +207,7 @@ def make_model():
     loss, acc = model.evaluate(Xtest, ytest, verbose=0)
     print('Test Accuracy: %f' % (acc*100))
 
-    model.save("relevancy_model_v2.0.h5")
+    model.save("relevancy_model_v2.0.1.h5")
     print("Done!")
 
 def make_model_NB():
@@ -297,4 +298,9 @@ def relevant(notif):
 
 
 if __name__ == "__main__":
-    make_model()
+    result=predict(" It is here by notified that the result of B.Tech S5 (S) Exam July 2019 is published. The detailed results are available in the KTU website: www.ktu.edu.in. Students can apply for answer script copy and revaluation by registering in the KTU web portal from 28.10.2019 Monday to 01.11.2019 Friday. The Fee for answer script copy is Rs.500/- per answer script and for revaluation Rs. 600/- per answer script. Students should submit their requests through student login and pay the fee at College office on or before 01.11.2019 Friday. Requests for late registration for revaluation and answer book copy will not be entertained. However in case of technical issues the request will be considered only if the matter is reported to University before the last date with proof.Result Notification - S5 (S)")
+    print(result)
+    if (result == 1) :
+        print("relevant")
+    else :
+        print("Irrelevant") 
