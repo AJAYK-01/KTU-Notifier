@@ -17,7 +17,7 @@ from collections import Counter
 from nltk.corpus import stopwords
 from numpy import loadtxt
 from tensorflow.python.keras.models import load_model
-import pickle
+import pickle5 as pickle
 from nltk.stem import WordNetLemmatizer 
 from sklearn.naive_bayes import GaussianNB
 from sklearn import metrics
