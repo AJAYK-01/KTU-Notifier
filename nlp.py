@@ -91,7 +91,6 @@ def make_model():
     X_test_padded = pad_sequences(X_test_sequences,maxlen=max_length, 
                                padding=padding_type, truncating=trunction_type)
 
-
     embeddings_index = {}
 
     #Download glove beforehand
@@ -121,7 +120,6 @@ def make_model():
     embedding_dim = 16
     input_length = 300
 
-
     #Model Architecture
     model = Sequential([
         embedding_layer,
@@ -138,6 +136,7 @@ def make_model():
     
     #Saving Model for prediction
     model.save("relevancy_model_v3.0.1.h5")
+
 
 
 def predict_process_docs(doc):
