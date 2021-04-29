@@ -1,1 +1,0 @@
- Using this functionality the student can download the examination hall tickets from Student login.
