@@ -149,7 +149,7 @@ def predict_process_docs(doc):
     return documents
 
 
-def predict(notif):
+def relevant(notif):
     predict_docs = predict_process_docs(notif)
     max_length=300
     with open('tokenizer_rnn.pickle', 'rb') as handle:
