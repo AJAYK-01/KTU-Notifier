@@ -1,29 +1,12 @@
-import nltk
-nltk.download('stopwords')
-nltk.download('wordnet')
-import numpy as np
-import tensorflow.python.keras
-from tensorflow.python.keras.preprocessing.text import Tokenizer
-from tensorflow.python.keras.models import Sequential
-from tensorflow.python.keras.layers import Dense
-from tensorflow.python.keras.layers import Conv1D
-from tensorflow.python.keras.layers import Flatten
-from tensorflow.python.keras.layers import MaxPooling1D
-from tensorflow.python.keras.layers.embeddings import Embedding
-from tensorflow.python.keras.preprocessing.sequence import pad_sequences
-from string import punctuation
 from os import listdir
-from collections import Counter
-from nltk.corpus import stopwords
-from numpy import loadtxt
-from tensorflow.python.keras.models import load_model
-import pickle
-from nltk.stem import WordNetLemmatizer 
-from sklearn.naive_bayes import GaussianNB
-from sklearn import metrics
+from tensorflow import keras
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.sequence import pad_sequences
+from keras.models import Sequential
+from keras.layers import Dense, Embedding, LSTM, Bidirectional
 from sklearn.model_selection import train_test_split
-  
-lemmatizer = WordNetLemmatizer()
+import numpy as np
+import pickle
 
 # load doc into memory
 def load_doc(filename):
@@ -35,248 +18,151 @@ def load_doc(filename):
     file.close()
     return text
 
-# turn a doc into clean tokens
+
+# pre processing
 def clean_doc(doc):
-    # split into tokens by white space
     tokens = doc.split()
-    # remove punctuation from each token
-    tokens = [lemmatizer.lemmatize(w) for w in tokens]
-    # remove remaining tokens that are not alphabetic
-    tokens = [word for word in tokens if word.isalpha()]
-    # filter out stop words
-    stop_words = set(stopwords.words('english'))
-    tokens = [w for w in tokens if not w in stop_words]
-    # filter out short tokens
-    tokens = [word for word in tokens if len(word) > 1]
-    return tokens
-
-# load doc and add to vocab
-def add_doc_to_vocab(filename, vocab):
-    # load doc
-    doc = load_doc(filename)
-    # clean doc
-    tokens = clean_doc(doc)
-    # update counts
-    vocab.update(tokens)
-
-# load all docs in a directory
-def process_docs(directory, vocab, is_trian):
-    # walk through all files in the folder
-    for filename in listdir(directory):
-        # create the full path of the file to open
-        path = directory + '/' + filename
-        # add doc to vocab
-        add_doc_to_vocab(path, vocab)
-
-# define vocab
-vocab = Counter()
-# add all docs to vocab
-process_docs('data/neg_train', vocab, True)
-process_docs('data/pos_train', vocab, True)
-# print the size of the vocab
-print(len(vocab))
-# print the top words in the vocab
-print(vocab.most_common(50))
-
-min_occurane = 3
-tokens = [k for k,c in vocab.items() if c >= min_occurane]
-print(len(tokens))
-
-# save list to file
-def save_list(lines, filename):
-    # convert lines to a single blob of text
-    data = '\n'.join(lines)
-    # open file
-    file = open(filename, 'w')
-    # write text
-    file.write(data)
-    # close file
-    file.close()
-
-# save tokens to a vocabulary file
-save_list(tokens, 'vocab.txt')
-
-# load doc into memory
-def load_doc(filename):
-    # open the file as read only
-    file = open(filename, 'r')
-    # read all text
-    text = file.read()
-    # close the file
-    file.close()
-    return text
-
-# load the vocabulary
-vocab_filename = 'vocab.txt'
-vocab = load_doc(vocab_filename)
-vocab = vocab.split()
-vocab = set(vocab)
-
-# turn a doc into clean tokens
-def clean_doc(doc, vocab):
-    # split into tokens by white space
-    tokens = doc.split()
-    # remove punctuation from each token
-    tokens = [lemmatizer.lemmatize(w) for w in tokens]
-    # filter out tokens not in vocab
-    tokens = [w for w in tokens if w in vocab]
+    #removing unnecessary characters
+    tokens=[w.replace('.','') for w in tokens]
+    tokens=[w.replace('-','') for w in tokens]
+    tokens=[w.replace('('," ") for w in tokens]
+    tokens=[w.replace(')'," ") for w in tokens]
+    tokens=[w.replace("'","") for w in tokens]
+    tokens=[w.replace('"',"") for w in tokens]
+    tokens=[w.lower() for w in tokens]
+    #return as a string 
     tokens = ' '.join(tokens)
     return tokens
 
 
-    # load all docs in a directory
 
 
-def process_docs(directory, vocab, is_trian):
+def process_docs(directory, is_trian):
     documents = list()
     print(directory+" : ",len(listdir(directory)))
     # walk through all files in the folder
     for filename in listdir(directory):
-        # skip any reviews in the test set
         # create the full path of the file to open
         path = directory + '/' + filename
-           # load the doc
+        # load the doc
         doc = load_doc(path)
         # clean doc
-        tokens = clean_doc(doc, vocab)
+        tokens = clean_doc(doc)
         # add to list
         documents.append(tokens)
+        
     return documents
 
 
 def make_model():
-    # load all training reviews
-    positive_docs = process_docs('data/pos_train', vocab, True)
-    negative_docs = process_docs('data/neg_train', vocab, True)
-    train_docs = negative_docs + positive_docs
-    # create the tokenizer
-    tokenizer = Tokenizer()
-    # fit the tokenizer on the documents
-    tokenizer.fit_on_texts(train_docs)
-    with open('tokenizer.pickle', 'wb') as handle:
-        pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    # load all notifications
+    positive_docs = process_docs('data/pos_train', True)
+    negative_docs = process_docs('data/neg_train', True)
 
-    # sequence encode
-    encoded_docs = tokenizer.texts_to_sequences(train_docs)
+    X = negative_docs + positive_docs
 
-    # pad sequences
-    max_length = max([len(s.split()) for s in train_docs])
-    print("\n\n maxlenght="+str(max_length))
-
-    from tensorflow.python.keras.preprocessing.sequence import pad_sequences
-    X = pad_sequences(encoded_docs, maxlen=max_length, padding='post')
-
-    # define training labels
     y = np.array([0 for _ in range(270)] + [1 for _ in range(270)])
 
-    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.30, random_state=42)
-    '''
-    # load all test reviews
-    positive_docs = process_docs('data/pos_test', vocab, False)
-    negative_docs = process_docs('data/neg_test', vocab, False)
-    test_docs = negative_docs + positive_docs
-    # sequence encode
-    encoded_docs = tokenizer.texts_to_sequences(test_docs)
-    # pad sequences
-    Xtest = pad_sequences(encoded_docs, maxlen=max_length, padding='post')
-    # define test labels
-    ytest = np.array([0 for _ in range(len(listdir("data/neg_test")))] + [1 for _ in range(len(listdir("data/pos_test")))])
-    '''
-    print("\n pad_sequences : ",Xtest)
-    print("\n ytest : ",ytest)
-
-    # define vocabulary size (largest integer value)
-    vocab_size = len(tokenizer.word_index) + 1
-
-    # define model
-    model = Sequential()
-    model.add(Embedding(vocab_size, 100, input_length=max_length))
-    model.add(Conv1D(filters=64, kernel_size=8, activation='relu'))
-    model.add(MaxPooling1D(pool_size=2))
-    model.add(Conv1D(filters=32, kernel_size=8, activation='relu'))
-    model.add(MaxPooling1D(pool_size=2))
-    model.add(Flatten())
-    model.add(Dense(10, activation='relu'))
-    model.add(Dense(1, activation='sigmoid'))
-    print(model.summary())
-    # compile network
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-    # fit network
-    model.fit(Xtrain, ytrain, epochs=20, verbose=1)
-    # evaluate
-    loss, acc = model.evaluate(Xtest, ytest, verbose=0)
-    print('Test Accuracy: %f' % (acc*100))
-
-    model.save("relevancy_model_v2.0.1.h5")
-    print("Done!")
-
-def make_model_NB():
-    # load all training reviews
-    positive_docs = process_docs('data/pos_train', vocab, True)
-    negative_docs = process_docs('data/neg_train', vocab, True)
-    train_docs = negative_docs + positive_docs
-    # create the tokenizer
-    tokenizer = Tokenizer()
-    # fit the tokenizer on the documents
-    tokenizer.fit_on_texts(train_docs)
-    with open('tokenizer.pickle', 'wb') as handle:
+    #Train Test Spliting data
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=42)
+    
+    #Parameters to embed words to matrices
+    vocab_size = 1000
+    oov_token = "<OOV>"
+    max_length = 300
+    padding_type = "post"
+    trunction_type="post"
+    
+    #Creating a Tokenizer from Train Set
+    tokenizer = Tokenizer(num_words = vocab_size,oov_token=oov_token)
+    tokenizer.fit_on_texts(X_train)
+    #Saving the Tokenizer for Prediction
+    with open('tokenizer_rnn.pickle', 'wb') as handle:
         pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    # sequence encode
-    encoded_docs = tokenizer.texts_to_sequences(train_docs)
+    #mapping tokenizer
+    word_index = tokenizer.word_index
 
-    # pad sequences
-    max_length = max([len(s.split()) for s in train_docs])
-    print("\n\n maxlenght="+str(max_length))
+    #Converting Train and Test Notifications to matrices by tokenizing
+    X_train_sequences = tokenizer.texts_to_sequences(X_train)
+    X_train_padded = pad_sequences(X_train_sequences,maxlen=max_length, padding=padding_type, 
+                       truncating=trunction_type)
+    X_test_sequences = tokenizer.texts_to_sequences(X_test)
+    X_test_padded = pad_sequences(X_test_sequences,maxlen=max_length, 
+                               padding=padding_type, truncating=trunction_type)
 
-    from tensorflow.python.keras.preprocessing.sequence import pad_sequences
-    Xtrain = pad_sequences(encoded_docs, maxlen=max_length, padding='post')
 
-    # define training labels
-    ytrain = np.array([0 for _ in range(250)] + [1 for _ in range(250)])
+    embeddings_index = {}
 
-    # load all test reviews
-    positive_docs = process_docs('data/pos_test', vocab, False)
-    negative_docs = process_docs('data/neg_test', vocab, False)
-    test_docs = negative_docs + positive_docs
-    # sequence encode
-    encoded_docs = tokenizer.texts_to_sequences(test_docs)
-    # pad sequences
-    Xtest = pad_sequences(encoded_docs, maxlen=max_length, padding='post')
-    # define test labels
-    ytest = np.array([0 for _ in range(len(listdir("data/neg_test")))] + [1 for _ in range(len(listdir("data/pos_test")))])
+    #Download glove beforehand
+    f = open('glove.6B/glove.6B.100d.txt')
+    for line in f:
+        values = line.split()
+        word = values[0]
+        coefs = np.asarray(values[1:], dtype='float32')
+        embeddings_index[word] = coefs
+    f.close()
 
-    print("\n pad_sequences : ",Xtest)
-    print("\n ytest : ",ytest)
-    gnb = GaussianNB()
-    gnb.fit(Xtrain, ytrain)
+    #Creating embedding matrix for each word in Our corpus
+    embedding_matrix = np.zeros((len(word_index) + 1, 100))
+    for word, i in word_index.items():
+        embedding_vector = embeddings_index.get(word)
+        if embedding_vector is not None:
+            # words not found in embedding index will be all-zeros.
+            embedding_matrix[i] = embedding_vector
+
+    #Defining Embedding layer
+    embedding_layer = Embedding(len(word_index) + 1,
+                                100,
+                                weights=[embedding_matrix],
+                                input_length=max_length,
+                                trainable=False)
+                    
+    embedding_dim = 16
+    input_length = 300
+
+
+    #Model Architecture
+    model = Sequential([
+        embedding_layer,
+        Bidirectional(LSTM(embedding_dim, return_sequences=True)),
+        Bidirectional(LSTM(embedding_dim,)),
+        Dense(6, activation='relu'),
+        Dense(1, activation='sigmoid')
+    ])
+
+    model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['accuracy'])
+    print(model.summary())
+
+    model.fit(X_train_padded, y_train, epochs=10, validation_data=(X_test_padded, y_test))
     
-    # making predictions on the testing set
-    y_pred = gnb.predict(Xtest)
-
-    print("Gaussian Naive Bayes model accuracy(in %):", metrics.accuracy_score(ytest, y_pred)*100)
+    #Saving Model for prediction
+    model.save("relevancy_model_v3.0.1.h5")
 
 
-def predict_process_docs(doc,vocab):
+def predict_process_docs(doc):
     documents = list()
     # clean doc
-    tokens = clean_doc(doc, vocab)
+    tokens = clean_doc(doc)
     # add to list
     documents.append(tokens)
     return documents
 
-def predict(doc):
-    predict_docs = predict_process_docs(doc,vocab)
 
-    with open('tokenizer.pickle', 'rb') as handle:
+def predict(notif):
+    predict_docs = predict_process_docs(notif)
+    max_length=300
+    with open('tokenizer_rnn.pickle', 'rb') as handle:
         tokenizer = pickle.load(handle)
 
-    encoded_docs = tokenizer.texts_to_sequences(predict_docs)
-
-    X = pad_sequences(encoded_docs, maxlen=94, padding='post')
+    X = tokenizer.texts_to_sequences(predict_docs)
+    padding_type = "post"
+    trunction_type="post"
+    X = pad_sequences(X,maxlen=max_length, padding=padding_type, 
+                       truncating=trunction_type)
     # load model
-    model = load_model('relevancy_model.h5')
-    y=model.predict_classes(np.array(X))
+    model = keras.models.load_model('relevancy_model.h5')
+    y=model.predict_classes(X)
     if (y == [[1]]) :
         #print("\nRelevant \n")
         return(1)
@@ -286,21 +172,5 @@ def predict(doc):
 
 
 
-
-def relevant(notif):
-    """ Checks for relevance of the notification content """ 
-    result=predict(notif)
-    print(result)
-    if (result == 1) :
-        return 1
-    else :
-        return 0 
-
-
 if __name__ == "__main__":
-    result=predict(" It is here by notified that the result of B.Tech S5 (S) Exam July 2019 is published. The detailed results are available in the KTU website: www.ktu.edu.in. Students can apply for answer script copy and revaluation by registering in the KTU web portal from 28.10.2019 Monday to 01.11.2019 Friday. The Fee for answer script copy is Rs.500/- per answer script and for revaluation Rs. 600/- per answer script. Students should submit their requests through student login and pay the fee at College office on or before 01.11.2019 Friday. Requests for late registration for revaluation and answer book copy will not be entertained. However in case of technical issues the request will be considered only if the matter is reported to University before the last date with proof.Result Notification - S5 (S)")
-    print(result)
-    if (result == 1) :
-        print("relevant")
-    else :
-        print("Irrelevant") 
+    print(predict("Webinar for S3 students on Quantum Computing on 26/11/2021"))

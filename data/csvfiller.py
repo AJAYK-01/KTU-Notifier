@@ -1,25 +1,22 @@
 import csv
-count=-1
-content_less=0
-with open('newdatatemp.csv', 'r') as file:
+with open('testdata.csv', 'r') as file:
     reader = csv.reader(file)
-    newreader=[]
-    for row in reader:
-        count=count+1
-        if(count==0):
-            continue
-        try:
-            if(str(row[1])==""):
-                row[1]=row[0]
-                row[1].replace('"','')
-            newreader.append(row[1:])
-        except:
-            print("error",count)
-
-    file = open('try.csv', 'w+', newline ='')
-    with file:
+    with open('testdatafinal.csv','w') as file:
         write = csv.writer(file)
+        newreader=[]
+        for j,row in enumerate(reader):
+            if(j==0):
+                continue
+            try:
+                if(row[3]==""):
+                    row[3]=row[1]
+                row[3].replace('"','')
+                newreader.append(row[3:4])
+            except:
+                print("error",j)
         write.writerows(newreader)
+
+        
 
 
 

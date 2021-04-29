@@ -1,12 +1,12 @@
 import json
 import csv
   
-with open('data.json') as json_file:
+with open('testdata.json') as json_file:
     data = json.load(json_file)
   
 
 
-data_file = open('newdata.csv', 'w')
+data_file = open('testdata.csv', 'w')
   
 # create the csv writer object
 csv_writer = csv.writer(data_file)
