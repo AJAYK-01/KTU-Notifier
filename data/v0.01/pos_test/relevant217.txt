@@ -1,1 +1,0 @@
- The feature for uploading \xc2\xa0student \xc2\xa0photographs for degree certificate ( B.Tech 2015-19 Admission ) \xc2\xa0 will be available on student login along with the online application for Degree certificate. Students can directly upload \xc2\xa0photograph in jpg format with file size less than 30KB and photo size 213px x 272px.
