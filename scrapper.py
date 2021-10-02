@@ -45,7 +45,7 @@ def scrape():
                     and hyperlink text (eg, notification, timetable) is definitely less than 25 """
                     content += text.replace('\n','').replace('\r','')+'\n'
 
-            data.append(dict({'date': date, 'title': title, 'link': links, 'content': content.rstrip()}))
+            data.append(dict({'date': date, 'title': title, 'link': links, 'content': content.strip()}))
     
     except Exception as e:
         # for debug
