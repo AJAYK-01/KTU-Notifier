@@ -1,5 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
+# for debug
+# import traceback
 
 def scrape():
     url = "https://ktu.edu.in/eu/core/announcements.htm"
@@ -14,6 +16,14 @@ def scrape():
         for tr in tr_list:
             links = []
             content = tr.findAll("b")
+
+            # Temporary Fix is to skip the announcement which causes the issue
+            # At least the bot will still work until that type of announcements could be scrapped properly
+            # Issue caused by Announcement on Sept 11
+            if(len(content) == 0):
+                # print(tr)
+                continue
+
             try:
                 links_all = tr.findAll("a")
                 for link in links_all:
@@ -38,6 +48,8 @@ def scrape():
             data.append(dict({'date': date, 'title': title, 'link': links, 'content': content}))
     
     except Exception as e:
+        # for debug
+        # traceback.print_exc()
         data = []
         print(str(e))
     # print(data[0])
