@@ -32,7 +32,7 @@
         "STORAGEBUCKET": {
             "description": "Firebase storage bucket",
             "required": "True"
-        },
+        }
     },
     "stack": "heroku-20",
     "buildpacks": [
