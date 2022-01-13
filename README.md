@@ -1,5 +1,9 @@
 # KTU Notifier
 
+#### The Easiest Way [Heroku ONLY 👾]
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
 Gives Notifications of KTU announcements from their site using a Telegram Bot ( http://t.me/ktunotifbot )
 
 ## Workflow
