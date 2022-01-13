@@ -10,17 +10,29 @@
     "repository": "https://github.com/craziks-creator/notofssc",
     "env": {
         "TOKEN": {
-            "description": "",
+            "description": "telegram both token",
             "required": "True"
         },
-        "API HASH": {
-            "description": "",
+        "APIKEY": {
+            "description": "Firebase api key",
             "required": "True"
         },
-        "API ID": {
-            "description": "",
+        "AUTHDOMAIN": {
+            "description": "your Firebase auth domain",
             "required": "True"
-        }
+        },
+        "DATABASEURL": {
+            "description": "Firebase DATABASE URL ",
+            "required": "True"
+        },
+        "PROJECTID": {
+            "description": " Your Firebase project id",
+            "required": "True"
+        },
+        "STORAGEBUCKET": {
+            "description": "Firebase storage bucket",
+            "required": "True"
+        },
     },
     "stack": "heroku-20",
     "buildpacks": [
