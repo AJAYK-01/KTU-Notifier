@@ -1,9 +1,10 @@
 {
-    "name": "Fortytele",
+    "name": "craziks-creator",
     "logo": "https://telegra.ph//file/7db6d5303399b8a92bb95.jpg",
-    "description": "App for SSC updates",
+    "description": "App for university updates",
     "keywords": [
         "SSC",
+        "Ktu",
         "telegram",
         "updates"
     ],
