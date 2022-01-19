@@ -2,11 +2,11 @@ from firebase import Firebase
 from decouple import config
 
 config = {
-  "apiKey": config('APIKEY'),
-  "authDomain": config('AUTHDOMAIN'),
-  "databaseURL": config('DATABASEURL'),
-  "projectId": config('PROJECTID'),
-  "storageBucket": config('STORAGEBUCKET')
+  "apiKey": os.getenv('APIKEY'),
+  "authDomain": os.getenv('AUTHDOMAIN'),
+  "databaseURL": os.getenv('DATABASEURL'),
+  "projectId": os.getenv('PROJECTID'),
+  "storageBucket": os.getenv('STORAGEBUCKET')
 }
 
 firebase = Firebase(config)
