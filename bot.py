@@ -9,7 +9,7 @@ import time
 import os
 
 #the token is stored in a file named .env in My system. Add your own token or .env file
-token = config('TOKEN')
+token = os.getenv('TOKEN')
 bot = TeleBot(token)
 notifs = getData()
 
