@@ -5,6 +5,9 @@ Gives Notifications of KTU announcements from their site using a Telegram Bot ( 
 ## Workflow
 <img src="https://github.com/AJAYK-01/ktu-notifier/blob/master/screenshots/Workflow.png" />
 
+
+### Python Version : 3.7(currently working) 
+
 ## Instructions to create your own version of this bot
 
 - Clone the Repo.
