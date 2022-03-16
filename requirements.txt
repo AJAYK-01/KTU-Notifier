@@ -8,7 +8,7 @@ firebase
 python_jwt
 gcloud
 sseclient
-pycrypto
+pycryptodome
 requests-toolbelt
 numpy==1.19.1
 tensorflow==2.0.0
