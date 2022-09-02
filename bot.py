@@ -65,6 +65,12 @@ def send_notifs(chat_id, contents, value):
                 int(chat_id), msg_content, parse_mode="html",
             )
 
+        """ Just a notification to admin to check which notification was makred relevant """
+        if(chat_id == admin):
+            bot.send_message(
+                int(admin), relevance, parse_mode="markdown"
+            )
+
 
 def scheduledjob():
     """ Send new notifications that come on KTU site. \n
@@ -153,6 +159,26 @@ def start_bot(message):
     bot.send_message(
         message.chat.id, "View the complete code at \n\n https://github.com/AJAYK-01/ktu-notifier ", parse_mode="markdown",
     )
+
+
+@bot.message_handler(commands=["broadcast"])
+def admin_msg(message):
+    """ to send service notifications from admin """
+
+    if(message.chat.id == int(admin)):
+        message = message.text.split(" ", 1)[1]
+        for key, value in users().items():
+            chat_id = key
+            """ checking if unsubscribed and send the notification """
+            if value != "F":
+                try:
+                    bot.send_message(int(chat_id), message,
+                                     parse_mode="markdown")
+                except Exception as e:
+                    print('line 86'+str(e))
+    else:
+        bot.send_message(message.chat.id, "**Uff hAcKerMAn**",
+                         parse_mode="markdown")
 
 
 def ping_repl():
