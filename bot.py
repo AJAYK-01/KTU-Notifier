@@ -198,4 +198,4 @@ scheduler.add_job(ping_repl, 'interval', seconds=20)
 scheduler.start()
 
 # infinity_polling to prevent timeout to telegram api
-bot.infinity_polling(True)
+bot.polling(none_stop=True, timeout=60)
