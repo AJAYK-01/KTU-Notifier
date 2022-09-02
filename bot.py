@@ -183,7 +183,8 @@ def admin_msg(message):
 
 def ping_repl():
     """ ping flask server in replit to avoid sleeping of the bot """
-    repl_res = requests.get("https://ktu-notif.telegramgdrive.repl.co")
+    repl_res = requests.get(
+        f"https://${os.environ['REPL_SLUG']}.${os.environ['REPL_OWNER']}.repl.co")
     print(str(repl_res))
 
 
