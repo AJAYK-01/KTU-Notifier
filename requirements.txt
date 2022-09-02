@@ -1,4 +1,6 @@
 beautifulsoup4
+flask
+telebot
 requests
 html5lib
 pyTelegramBotAPI
@@ -11,8 +13,9 @@ sseclient
 pycrypto
 requests-toolbelt
 numpy==1.19.1
-tensorflow==2.0.0
+tensorflow-cpu==2.2.0
 h5py==2.9.0
 nltk==3.5
 sklearn
 pickle5
+protobuf==3.20.*
