@@ -61,9 +61,13 @@ def send_notifs(chat_id, contents, value):
                 msg_link_text = "<a href=\"" + \
                     link["url"]+"\">"+link["text"]+"</a>"
                 msg_content += "\n"+msg_link_text
-            bot.send_message(
-                int(chat_id), msg_content, parse_mode="html",
-            )
+
+            try:
+                bot.send_message(
+                    int(chat_id), msg_content, parse_mode="html",
+                )
+            except Exception as e:
+                print(str(e))
 
         """ Just a notification to admin to check which notification was makred relevant """
         if(chat_id == admin):
