@@ -1,5 +1,5 @@
-from telebot import TeleBot, types
-from decouple import config
+from telebot import TeleBot
+# from decouple import config
 from scrapper import scrape
 from db import subscribe, unsubscribe, users, relevantsub, getData, setData
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -8,10 +8,12 @@ import requests
 import time
 import os
 
-#the token is stored in a file named .env in My system. Add your own token or .env file
-token = config('TOKEN')
+token = os.environ['TOKEN']
 bot = TeleBot(token)
+
+admin = os.environ['ADMIN']
 notifs = getData()
+
 
 def get_contents():
     """
@@ -25,20 +27,22 @@ def get_contents():
         for scrap in scraped:
             k = 0
             for data in datas:
-            # Can't do a "not in" comparison with dictionary element coz download links inside it are 
-            # unique to each request
+                # Can't do a "not in" comparison with dictionary element coz download links inside it are
+                # unique to each request
                 if data['title'] == scrap['title'] and data['date'] == scrap['date']:
                     k = 1
-                    break   
-            
+                    break
+
             if k == 0:
                 relevance = relevant(scrap['content'])
-                contents.append(dict({'data': scrap, 'relevance': str(relevance)}))
-        
+                contents.append(
+                    dict({'data': scrap, 'relevance': str(relevance)}))
+
         notifs = scraped
         return contents
     else:
         return []
+
 
 def send_notifs(chat_id, contents, value):
     """ Sends the newly scraped notification to individual users
@@ -50,15 +54,27 @@ def send_notifs(chat_id, contents, value):
 
         """ Checking for Relevance using ML and also whether user wants all notifs """
         if relevance == '1' or value == 'T':
-            msg_content = content['date']+'\n\n'+content["title"]+':\n\n'+content["content"]
+            msg_content = content['date']+'\n\n' + \
+                content["title"]+':\n\n'+content["content"]
             for link in content["link"]:
-                #telegram supports html like hyperlinks!! :)
-                msg_link_text = "<a href=\""+link["url"]+"\">"+link["text"]+"</a>"
+                # telegram supports html like hyperlinks!! :)
+                msg_link_text = "<a href=\"" + \
+                    link["url"]+"\">"+link["text"]+"</a>"
                 msg_content += "\n"+msg_link_text
+
+            try:
+                bot.send_message(
+                    int(chat_id), msg_content, parse_mode="html",
+                )
+            except Exception as e:
+                print(str(e))
+
+        """ Just a notification to admin to check which notification was makred relevant """
+        if(chat_id == admin):
             bot.send_message(
-                int(chat_id), msg_content, parse_mode="html",
+                int(admin), relevance, parse_mode="markdown"
             )
-            
+
 
 def scheduledjob():
     """ Send new notifications that come on KTU site. \n
@@ -73,7 +89,7 @@ def scheduledjob():
             """ checking if unsubscribed and send the notification """
             if value != "F":
                 send_notifs(chat_id, contents, value)
-        
+
         setData(notifs)
 
 
@@ -81,16 +97,17 @@ def scheduledjob():
 def fetch_notifs(message):
     """ view """
     contents = scrape()
-    
-    #If dumb KTU is down as expected, fetch from previously scraped data
+
+    # If dumb KTU is down as expected, fetch from previously scraped data
     if contents == [] or not contents:
         contents = notifs
 
     for i in range(10):
         content = contents[i]
-        msg_content = content['date']+'\n\n'+content["title"]+':\n\n'+content["content"]
+        msg_content = content['date']+'\n\n' + \
+            content["title"]+':\n\n'+content["content"]
         for link in content["link"]:
-            #telegram supports html like hyperlinks!! :)
+            # telegram supports html like hyperlinks!! :)
             msg_link_text = "<a href=\""+link["url"]+"\">"+link["text"]+"</a>"
             msg_content += "\n"+msg_link_text
         bot.send_message(
@@ -104,8 +121,9 @@ def subscribed(message):
 
     subscribe(message.chat.id)
     bot.send_message(
-            message.chat.id, "Subscribed!!", parse_mode="markdown",
-    )  
+        message.chat.id, "Subscribed!!", parse_mode="markdown",
+    )
+
 
 @bot.message_handler(commands=["filtered"])
 def filtered(message):
@@ -113,19 +131,18 @@ def filtered(message):
 
     relevantsub(message.chat.id)
     bot.send_message(
-            message.chat.id, "Subscribed to Relevant Notiications (*Beta*)", parse_mode="markdown",
-    )  
+        message.chat.id, "Subscribed to Relevant Notiications (*Beta*)", parse_mode="markdown",
+    )
 
-    
-                
+
 @bot.message_handler(commands=["unsubscribe"])
 def unsubscribed(message):
     """ unsubscribe """
 
     unsubscribe(message.chat.id)
     bot.send_message(
-            message.chat.id, "Unsubscribed", parse_mode="markdown",
-    )  
+        message.chat.id, "Unsubscribed", parse_mode="markdown",
+    )
 
 
 @bot.message_handler(commands=["start"])
@@ -138,17 +155,51 @@ def send_instructions(message):
         message.chat.id, msg_content, parse_mode="markdown",
     )
 
+
 @bot.message_handler(commands=["code"])
 def start_bot(message):
     """code - Displays link to Github repo of this project"""
-    
+
     bot.send_message(
         message.chat.id, "View the complete code at \n\n https://github.com/AJAYK-01/ktu-notifier ", parse_mode="markdown",
-    ) 
+    )
+
+
+@bot.message_handler(commands=["broadcast"])
+def admin_msg(message):
+    """ to send service notifications from admin """
+
+    if(message.chat.id == int(admin)):
+        message = message.text.split(" ", 1)[1]
+        for key, value in users().items():
+            chat_id = key
+            """ checking if unsubscribed and send the notification """
+            if value != "F":
+                try:
+                    bot.send_message(int(chat_id), message,
+                                     parse_mode="markdown")
+                except Exception as e:
+                    print('line 86'+str(e))
+    else:
+        bot.send_message(message.chat.id, "**Uff hAcKerMAn**",
+                         parse_mode="markdown")
+
+
+def ping_repl():
+    """ ping flask server in replit to avoid sleeping of the bot """
+    repl_res = requests.get(
+        f"https://{os.environ['REPL_SLUG']}.{os.environ['REPL_OWNER']}.repl.co")
+    print(str(repl_res))
+
+
+# first executions
+ping_repl()
+scheduledjob()
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(scheduledjob, 'interval', minutes=10)
+scheduler.add_job(ping_repl, 'interval', seconds=20)
 scheduler.start()
 
-#infinity_polling to prevent timeout to telegram api
-bot.infinity_polling(True)
+# infinity_polling to prevent timeout to telegram api
+bot.polling(none_stop=True, timeout=60)
