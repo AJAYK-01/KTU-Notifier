@@ -1,3 +1,7 @@
+## Note
+**KTU has updated their website to use an API and React, and hence the web scraper in this project no longer works. <br/>
+An update to use the api (api.ktu.edu.in) is required for this project to run, and any PRs for the same are welcome!** <br/> <br/> Check Related Issue [#22](/../../issues/22)
+
 # KTU Notifier
 
 Gives Notifications of KTU announcements from their site using a Telegram Bot ( http://t.me/ktunotifbot )
